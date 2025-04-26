@@ -4,7 +4,8 @@ import reactLogo from "./assets/react.svg";
 
 function App() {
     const [count, setCount] = useState(0);
-
+    //@ts-ignore
+    window.electron.getStaticData();
     return (
         <>
             <div>
