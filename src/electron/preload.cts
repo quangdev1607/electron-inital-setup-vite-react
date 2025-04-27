@@ -1,6 +1,6 @@
-const electron = require("electron");
+import { contextBridge } from "electron";
 
-electron.contextBridge.exposeInMainWorld("electron", {
+contextBridge.exposeInMainWorld("electron", {
     subscribeStatistics: (callback: (statistics: any) => void) => callback({}),
     getStaticData: () => console.log("static"),
 });
