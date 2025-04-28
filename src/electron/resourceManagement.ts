@@ -2,6 +2,7 @@ import { BrowserWindow } from "electron";
 import fs from "fs";
 import os from "os";
 import osUtils from "os-utils";
+import { ipcWebContentsSend } from "./util.js";
 
 const POLLING_INTERVAL = 1000;
 
@@ -10,7 +11,11 @@ export function pollResource(mainWindow: BrowserWindow) {
         const cpuUsage = await getCpuUsage();
         const ramUsage = getRamUsage();
         const storageData = getStorageData();
-        mainWindow.webContents.send("statistics", { cpuUsage, ramUsage, storageUsage: storageData.usage });
+        ipcWebContentsSend("statistics", mainWindow.webContents, {
+            cpuUsage,
+            ramUsage,
+            storageUsage: storageData.usage,
+        });
     }, POLLING_INTERVAL);
 }
 
@@ -26,7 +31,7 @@ export function getStaticData() {
     };
 }
 
-function getCpuUsage() {
+function getCpuUsage(): Promise<number> {
     return new Promise((resolve) => {
         osUtils.cpuUsage(resolve);
     });
@@ -37,18 +42,13 @@ function getRamUsage() {
 }
 
 function getStorageData() {
+    // requires node 18
     const stats = fs.statfsSync(process.platform === "win32" ? "C://" : "/");
-    const totalBytes = stats.bsize * stats.blocks;
-    const freeBytes = stats.bsize * stats.bfree;
-    const usedBytes = totalBytes - freeBytes;
-
-    const totalGB = totalBytes / 1_000_000_000;
-    const usedGB = usedBytes / 1_000_000_000;
-    const usagePercent = (usedBytes / totalBytes) * 100;
+    const total = stats.bsize * stats.blocks;
+    const free = stats.bsize * stats.bfree;
 
     return {
-        total: totalGB.toFixed(2),
-        used: usedGB.toFixed(2),
-        usage: usagePercent.toFixed(1),
+        total: Math.floor(total / 1_000_000_000),
+        usage: 1 - free / total,
     };
 }
