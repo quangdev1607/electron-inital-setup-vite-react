@@ -5,7 +5,8 @@ import reactLogo from "./assets/react.svg";
 function App() {
     const [count, setCount] = useState(0);
     useEffect(() => {
-        window.electron.subscribeStatistics((stats) => console.log(stats));
+        const unsub = window.electron.subscribeStatistics((stats) => console.log(stats));
+        return unsub;
     }, []);
     return (
         <>
