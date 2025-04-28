@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, Tray } from "electron";
 import path from "path";
+import { createMenu } from "./menu.js";
 import { getAssetPath, getPreloadPath, getUIPath } from "./pathResolver.js";
 import { getStaticData, pollResource } from "./resourceManagement.js";
 import { createTray } from "./tray.js";
@@ -25,6 +26,7 @@ app.on("ready", () => {
     });
 
     createTray(mainWindow);
+    createMenu(mainWindow);
 
     handleCloseEvents(mainWindow);
 });
