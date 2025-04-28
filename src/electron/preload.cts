@@ -1,6 +1,10 @@
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("electron", {
-    subscribeStatistics: (callback: (statistics: any) => void) => callback({}),
-    getStaticData: () => console.log("static"),
-});
+    subscribeStatistics: (callback) => {
+        ipcRenderer.on("statistics", (_, stats) => {
+            callback(stats);
+        });
+    },
+    getStaticData: () => ipcRenderer.invoke("getStaticData"),
+} satisfies Window["electron"]);
